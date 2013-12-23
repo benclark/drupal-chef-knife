@@ -1,0 +1,8 @@
+name = Chef Knife API
+description = Provides interface for interacting with Chef Server.
+package = Chef
+core = 7.x
+
+dependencies[] = http_client
+
+files[] = includes/ChefKnifeAPIAuth.inc

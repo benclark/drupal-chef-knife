@@ -1,0 +1,87 @@
+<?php
+
+/**
+ * @file
+ * Chef Knife API
+ * Provides interface for interacting with Chef Server.
+ */
+
+
+/**
+ * The API version.
+ */
+define('CHEF_KNIFE_API_VERSION', '11.4.0');
+
+/**
+ * Implements hook_menu().
+ */
+function chef_knife_menu() {
+  $items = array();
+
+  $items['admin/config/services/chef-knife'] = array(
+    'title' => 'Chef Knife',
+    'description' => 'Configure settings for Chef Knife.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('chef_knife_settings_form'),
+    'access arguments' => array('administer chef_knife'),
+    'file' => 'chef_knife.admin.inc',
+  );
+  $items['admin/config/services/chef-knife/settings'] = array(
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'title' => 'Settings',
+  );
+  $items['admin/config/services/chef-knife/test'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Test',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('chef_knife_test'),
+    'access arguments' => array('administer chef_knife'),
+    'file' => 'chef_knife.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Main interface for interacting with Chef server API.
+ */
+function chef_knife($endpoint = '', $method = 'GET', $data = NULL) {
+  $chef_server = variable_get('chef_knife_server', 'https://api.opscode.com/organizations/org_name');
+  $client_name = variable_get('chef_knife_client_name', '');
+  $private_key_file = variable_get('chef_knife_private_key_file', '');
+
+  return _chef_knife($endpoint, $method, $data, $chef_server, $client_name, $private_key_file);
+}
+
+/**
+ * Helper interface for interacting with Chef server API.
+ */
+function _chef_knife($endpoint, $method, $data, $chef_server, $client_name, $private_key_file) {
+  if (empty($endpoint) || empty($method) || empty($chef_server) || empty($client_name) || empty($private_key_file)) {
+    throw new HttpClientException('Missing required argument');
+  }
+
+  // Prepare for a response in JSON.
+  $formatter = new HttpClientBaseFormatter(HttpClientBaseFormatter::FORMAT_JSON);
+
+  // Prepare for signing the headers.
+  $auth = new ChefKnifeAPIAuth($client_name, $private_key_file);
+
+  // Prepare for client requests.
+  $client = new HttpClient($auth, $formatter);
+
+  // Make the request.
+  switch ($method) {
+    case 'GET':
+      $result = $client->get($chef_server . '/' . $endpoint);
+      break;
+    case 'POST':
+      $result = $client->post($chef_server . '/' . $endpoint, $data);
+      break;
+    case 'PUT':
+      $result = $client->put($chef_server . '/' . $endpoint, $data);
+      break;
+  }
+
+  return $result;
+}
