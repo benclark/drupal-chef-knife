@@ -92,6 +92,9 @@ function chef_knife_test_submit($form, &$form_state) {
     if (module_exists('devel')) {
       dpm($result);
     }
+    else {
+      drupal_set_message(t('To view the test results, please enable the devel module.'));
+    }
   }
   drupal_set_message(t('Chef server contacted.'));
 }
