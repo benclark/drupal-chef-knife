@@ -47,7 +47,7 @@ function chef_knife_settings_form_validate($form, &$form_state) {
     $client_name = $form_state['values']['chef_knife_client_name'];
     $private_key_file = $form_state['values']['chef_knife_private_key_file'];
     // Use the 'users' endpoint to prove that we can grab data from the server.
-    $result = _chef_knife('users', 'GET', NULL, $chef_server, $client_name, $private_key_file);
+    $result = _chef_knife('nodes', 'GET', NULL, $chef_server, $client_name, $private_key_file);
   }
   catch (Exception $e) {
     form_set_error('chef_knife_server', t('Could not authenticate with Chef server with the provided credentials.'));
