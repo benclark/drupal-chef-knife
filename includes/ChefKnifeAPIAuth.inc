@@ -62,9 +62,12 @@ class ChefKnifeAPIAuth implements HttpClientAuthentication {
       }
     }
 
+    // Remove querystring from endpoint.
+    $parsed_url = parse_url($request->url);
+
     // Find the endpoint.
     $endpoint = '';
-    if (preg_match('/organizations\/(.+)\/(.+)/', $request->url, $matches)) {
+    if (preg_match('/organizations\/(.+)\/(.+)/', $parsed_url['path'], $matches)) {
       $endpoint = '/organizations/' . $matches[1] . '/' . $matches[2];
     }
 
